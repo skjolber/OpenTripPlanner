@@ -28,8 +28,13 @@ public class OptimizationTest extends MmriTest {
     }
 
     public void test2a2() {
-        Leg leg = plan(+1388530980L, "2a1", "2a2", null, false, false, null, "", "");
-
-        validateLeg(leg, 1388531100000L, 1388531160000L, "2a2", "2a1", null);
+    	long deadline = System.currentTimeMillis() + 150000;
+    	while(deadline > System.currentTimeMillis()) {
+    		Leg leg = plan(+1388530980L, "2a1", "2a2", null, false, false, null, "", "");
+    		if(leg == null) {
+    			throw new IllegalArgumentException();
+    		}
+    	}
+        //validateLeg(leg, 1388531100000L, 1388531160000L, "2a2", "2a1", null);
     }
 }

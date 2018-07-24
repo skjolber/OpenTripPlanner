@@ -121,13 +121,14 @@ public class AStar {
         // Initializing the bidirectional heuristic is a pretty complicated operation that involves searching through
         // the streets around the origin and destination.
         runState.heuristic.initialize(runState.options, abortTime);
+        /*
         if (abortTime < Long.MAX_VALUE  && System.currentTimeMillis() > abortTime) {
             LOG.warn("Timeout during initialization of goal direction heuristic.");
             options.rctx.debugOutput.timedOut = true;
             runState = null; // Search timed out
             return;
         }
-
+*/
         // Priority Queue.
         // The queue is self-resizing, so we initialize it to have size = O(sqrt(|V|)) << |V|.
         // For reference, a random, undirected search on a uniform 2d grid will examine roughly sqrt(|V|) vertices
@@ -239,6 +240,7 @@ public class AStar {
             /*
              * Terminate based on timeout?
              */
+        	/*
             if (abortTime < Long.MAX_VALUE  && System.currentTimeMillis() > abortTime) {
                 LOG.warn("Search timeout. origin={} target={}", runState.rctx.origin, runState.rctx.target);
                 // Rather than returning null to indicate that the search was aborted/timed out,
@@ -249,7 +251,7 @@ public class AStar {
 
                 break;
             }
-            
+            */
             /*
              * Get next best state and, if it hasn't already been dominated, add adjacent states to queue.
              * If it has been dominated, the iteration is over; don't bother checking for termination condition.

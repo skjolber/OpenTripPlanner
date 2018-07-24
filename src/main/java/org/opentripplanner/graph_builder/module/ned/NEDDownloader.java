@@ -42,7 +42,7 @@ import java.util.zip.ZipFile;
 /**
  * Downloads tiles from the National Elevation Dataset. 
  * @author novalis
- *
+ *https://services.nationalmap.gov/arcgis/rest/services/3DEPElevationIndex/MapServer
  */
 public class NEDDownloader implements NEDTileSource {
 
