@@ -109,20 +109,17 @@ public class StreamedOpenStreetMapParser {
                     osmWay.addNodeRef(nodeRef);
 
                 } else if (element.getName().equals(qTag)) {
-                    OSMTag tag = new OSMTag();
                     String key = element.getAttributeByName(qKey).getValue();
-                    tag.setK(key.intern());
                     String value = element.getAttributeByName(qVal).getValue();
                     if (key.equals("name") || key.equals("ref") || key.equals("highway")) {
                         value = value.intern();
                     }
-                    tag.setV(value);
                     if (osmNode != null) {
-                        osmNode.addTag(tag);
+                        osmNode.addTag(key, value);
                     } else if (osmWay != null) {
-                        osmWay.addTag(tag);
+                        osmWay.addTag(key, value);
                     } else if (osmRelation != null) {
-                        osmRelation.addTag(tag);
+                        osmRelation.addTag(key, value);
                     }
                 }
 

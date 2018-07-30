@@ -53,16 +53,6 @@ public class OSMWithTags {
     /**
      * Adds a tag.
      */
-    public void addTag(OSMTag tag) {
-        if (_tags == null)
-            _tags = new HashMap<String, String>();
-
-        _tags.put(tag.getK().toLowerCase(), tag.getV());
-    }
-
-    /**
-     * Adds a tag.
-     */
     public void addTag(String key, String value) {
         if (key == null || value == null)
             return;

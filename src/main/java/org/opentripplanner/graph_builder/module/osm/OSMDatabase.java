@@ -861,20 +861,22 @@ public class OSMDatabase implements OpenStreetMapContentHandler {
                 continue;
             }
 
-            if (relation.hasTag("name")) {
+            String name = relation.getTag("name");
+            if (name != null) {
                 if (way.hasTag("otp:route_name")) {
                     way.addTag("otp:route_name",
-                            addUniqueName(way.getTag("otp:route_name"), relation.getTag("name")));
+                            addUniqueName(way.getTag("otp:route_name"), name));
                 } else {
-                    way.addTag(new OSMTag("otp:route_name", relation.getTag("name")));
+                    way.addTag("otp:route_name", name);
                 }
             }
-            if (relation.hasTag("ref")) {
+            String ref = relation.getTag("ref");
+            if (ref != null) {
                 if (way.hasTag("otp:route_ref")) {
                     way.addTag("otp:route_ref",
-                            addUniqueName(way.getTag("otp:route_ref"), relation.getTag("ref")));
+                            addUniqueName(way.getTag("otp:route_ref"), ref));
                 } else {
-                    way.addTag(new OSMTag("otp:route_ref", relation.getTag("ref")));
+                    way.addTag("otp:route_ref", ref);
                 }
             }
         }

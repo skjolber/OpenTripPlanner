@@ -72,10 +72,7 @@ public class BinaryOpenStreetMapParser extends BinaryParser {
                 String key = internalize(getStringById(i.getKeys(j)));
                 // if _handler.retain_tag(key) // TODO: filter tags
                 String value = internalize(getStringById(i.getVals(j)));
-                OSMTag tag = new OSMTag();
-                tag.setK(key);
-                tag.setV(value);
-                tmp.addTag(tag);
+                tmp.addTag(key, value);
             }
 
             _handler.addNode(tmp);
@@ -112,12 +109,9 @@ public class BinaryOpenStreetMapParser extends BinaryParser {
                     int keyid = nodes.getKeysVals(j++);
                     int valid = nodes.getKeysVals(j++);
 
-                    OSMTag tag = new OSMTag();
                     String key = internalize(getStringById(keyid));
                     String value = internalize(getStringById(valid));
-                    tag.setK(key);
-                    tag.setV(value);
-                    tmp.addTag(tag);
+                    tmp.addTag(key, value);
                 }
                 j++; // Skip over the '0' delimiter.
             }
@@ -137,12 +131,9 @@ public class BinaryOpenStreetMapParser extends BinaryParser {
             tmp.setId(i.getId());
 
             for (int j = 0; j < i.getKeysCount(); j++) {
-                OSMTag tag = new OSMTag();
                 String key = internalize(getStringById(i.getKeys(j)));
                 String value = internalize(getStringById(i.getVals(j)));
-                tag.setK(key);
-                tag.setV(value);
-                tmp.addTag(tag);
+                tmp.addTag(key, value);
             }
 
             long lastId = 0;
@@ -169,12 +160,9 @@ public class BinaryOpenStreetMapParser extends BinaryParser {
             tmp.setId(i.getId());
 
             for (int j = 0; j < i.getKeysCount(); j++) {
-                OSMTag tag = new OSMTag();
                 String key = internalize(getStringById(i.getKeys(j)));
                 String value = internalize(getStringById(i.getVals(j)));
-                tag.setK(key);
-                tag.setV(value);
-                tmp.addTag(tag);
+                tmp.addTag(key, value);
             }
 
             long lastMid = 0;

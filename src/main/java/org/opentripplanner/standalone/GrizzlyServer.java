@@ -14,6 +14,7 @@ import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
 import org.glassfish.jersey.server.ContainerFactory;
+import org.opentripplanner.openstreetmap.model.OSMWithTags;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
@@ -151,7 +152,9 @@ public class GrizzlyServer {
         try {
             httpServer.start();
             LOG.info("Grizzly server running.");
+            LOG.info(OSMWithTags.printTags());
             Thread.currentThread().join();
+            
         } catch (BindException be) {
             LOG.error("Cannot bind to port {}. Is it already in use?", params.port);
         } catch (IOException ioe) {

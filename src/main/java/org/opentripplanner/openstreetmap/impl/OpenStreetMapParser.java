@@ -18,7 +18,6 @@ import org.opentripplanner.openstreetmap.model.OSMNode;
 import org.opentripplanner.openstreetmap.model.OSMNodeRef;
 import org.opentripplanner.openstreetmap.model.OSMRelation;
 import org.opentripplanner.openstreetmap.model.OSMRelationMember;
-import org.opentripplanner.openstreetmap.model.OSMTag;
 import org.opentripplanner.openstreetmap.model.OSMWay;
 import org.opentripplanner.openstreetmap.model.OSMWithTags;
 import org.w3c.dom.Document;
@@ -136,15 +135,12 @@ public class OpenStreetMapParser {
             }
             Element child = (Element) node;
             if (child.getTagName().equals("tag")) {
-                OSMTag tag = new OSMTag();
-                String key = child.getAttribute("k");
-                tag.setK(key.intern());
+                String key = child.getAttribute("k").intern();
                 String value = child.getAttribute("v");
                 if (key.equals("name") || key.equals("highway")) {
                     value = value.intern();
                 }
-                tag.setV(value);
-                osm.addTag(tag);
+                osm.addTag(key, value);
             }
             node = node.getNextSibling();
         }
