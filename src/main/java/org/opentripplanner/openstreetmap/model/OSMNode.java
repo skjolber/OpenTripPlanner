@@ -46,11 +46,11 @@ public class OSMNode extends OSMWithTags {
      * @author mattwigway
      */
     public boolean isMultiLevel() {
-        return hasTag("highway") && "elevator".equals(getTag("highway"));
+        return isTag("highway", "elevator");
     }
     
     public boolean hasTrafficLight() {
-        return hasTag("highway") && "traffic_signals".equals(getTag("highway"));
+        return isTag("highway", "traffic_signals");
     }
 
     /**
@@ -60,11 +60,17 @@ public class OSMNode extends OSMWithTags {
      * @author hannesj
      */
     public boolean isStop() {
-        return "bus_stop".equals(getTag("highway"))
-                || "tram_stop".equals(getTag("railway"))
-                || "station".equals(getTag("railway"))
-                || "halt".equals(getTag("railway"))
-                || "bus_station".equals(getTag("amenity"));
+        if(isTag("highway", "bus_stop")) {
+            return true;
+        }
+
+        String railwayValue = getTag("railway");
+        if(railwayValue != null) {
+            if(railwayValue.equals("station") || railwayValue.equals("tram_stop") || railwayValue.equals("halt")) {
+                return true;
+            }
+        }
+        return isTag("amenity", "bus_station");
     }
 
     /**

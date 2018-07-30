@@ -49,8 +49,7 @@ public class OSMWay extends OSMWithTags {
      * @return
      */
     public boolean isBicycleDismountForced() {
-        String bicycle = getTag("bicycle");
-        return isTag("cycleway", "dismount") || "dismount".equals(bicycle);
+        return isTag("cycleway", "dismount") || isTag("bicycle", "dismount");
     }
 
     /**
@@ -95,8 +94,7 @@ public class OSMWay extends OSMWithTags {
      * @return
      */
     public boolean isOneWayForwardBicycle() {
-        String oneWayBicycle = getTag("oneway:bicycle");
-        return isTrue(oneWayBicycle) || isTagFalse("bicycle:backwards");
+        return isTagTrue("oneway:bicycle") || isTagFalse("bicycle:backwards");
     }
 
     /**
@@ -134,11 +132,15 @@ public class OSMWay extends OSMWithTags {
     public boolean isOpposableCycleway() {
         // any cycleway which is opposite* allows contraflow biking
         String cycleway = getTag("cycleway");
+        if(cycleway != null && cycleway.startsWith("opposite")) {
+            return true;
+        }
         String cyclewayLeft = getTag("cycleway:left");
+        if(cyclewayLeft != null && cyclewayLeft.startsWith("opposite")) {
+            return true;
+        }
         String cyclewayRight = getTag("cycleway:right");
 
-        return (cycleway != null && cycleway.startsWith("opposite"))
-                || (cyclewayLeft != null && cyclewayLeft.startsWith("opposite"))
-                || (cyclewayRight != null && cyclewayRight.startsWith("opposite"));
+        return cyclewayRight != null && cyclewayRight.startsWith("opposite");
     }
 }

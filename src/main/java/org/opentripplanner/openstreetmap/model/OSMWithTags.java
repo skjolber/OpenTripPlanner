@@ -54,10 +54,7 @@ public class OSMWithTags {
      * Adds a tag.
      */
     public void addTag(OSMTag tag) {
-        if (_tags == null)
-            _tags = new HashMap<String, String>();
-
-        _tags.put(tag.getK().toLowerCase(), tag.getV());
+    	addTag(tag.getK(), tag.getV());
     }
 
     /**
@@ -75,6 +72,7 @@ public class OSMWithTags {
 
     /**
      * The tags of an entity.
+     * @return map of tag name (in lowercase) and value
      */
     public Map<String, String> getTags() {
         return _tags;
@@ -82,65 +80,81 @@ public class OSMWithTags {
 
     /**
      * Is the tag defined?
+     * @param tag - tag name (must be lowercase string)
+     * @return true if tags exits
      */
     public boolean hasTag(String tag) {
-        tag = tag.toLowerCase();
         return _tags != null && _tags.containsKey(tag);
     }
 
     /**
      * Determines if a tag contains a false value. 'no', 'false', and '0' are considered false.
+     * 
+     * @param tag - tag name (must be lowercase string)
      */
     public boolean isTagFalse(String tag) {
-        tag = tag.toLowerCase();
-        if (_tags == null)
-            return false;
+    	String value = getTag(tag);
 
-        return isFalse(getTag(tag));
+        return value != null && isFalse(value);
     }
 
     /**
      * Determines if a tag contains a true value. 'yes', 'true', and '1' are considered true.
+     * @param tag - tag name (must be lowercase string)
      */
     public boolean isTagTrue(String tag) {
-        tag = tag.toLowerCase();
-        if (_tags == null)
-            return false;
+    	String value = getTag(tag);
 
-        return isTrue(getTag(tag));
+    	return value != null && isTrue(value);
     }
+    
+    /**
+     * Check tag access
+     * 
+     * @param tag tag name (must be in lowercase)
+     * @return true if access
+     */
 
-    public boolean doesTagAllowAccess(String tag) {
+    protected boolean doesTagAllowAccess(String tag) {
         if (_tags == null) {
             return false;
         }
-        if (isTagTrue(tag)) {
+        String value = _tags.get(tag);
+        if(value == null) {
+        	return false;
+        }
+        if (isTrue(value)) {
             return true;
         }
-        tag = tag.toLowerCase();
-        String value = getTag(tag);
+
         return ("designated".equals(value) || "official".equals(value)
                 || "permissive".equals(value) || "unknown".equals(value));
     }
 
-    /** @return a tag's value, converted to lower case. */
+    /** 
+     * @param tag tag name (must be in lowercase)
+     * @return tag value 
+     */
     public String getTag(String tag) {
-        tag = tag.toLowerCase();
-        if (_tags != null && _tags.containsKey(tag)) {
-            return _tags.get(tag);
+        if (_tags != null) {
+        	return _tags.get(tag);
         }
         return null;
     }
 
     /**
      * Checks is a tag contains the specified value.
+     * @param tag - tag name (must be lowercase string)
+     * @param value to check against
+     * @return true if tag is equal to value 
      */
     public Boolean isTag(String tag, String value) {
-        tag = tag.toLowerCase();
-        if (_tags != null && _tags.containsKey(tag) && value != null)
-            return value.equals(_tags.get(tag));
-
-        return false;
+    	if(value == null) {
+    		return false;
+    	}
+    	String tagValue = getTag(tag);
+    	
+    	return tagValue != null && tagValue.equals(value);
     }
 
     /**
@@ -148,35 +162,47 @@ public class OSMWithTags {
      * {@link org.opentripplanner.graph_builder.module.osm.OpenStreetMapModule#processRelations processRelations}
      */
     public I18NString getAssumedName() {
-        if (_tags.containsKey("name"))
-            return TranslatedString.getI18NString(TemplateLibrary.generateI18N("{name}", this));
-
-        if (_tags.containsKey("otp:route_name"))
-            return new NonLocalizedString(_tags.get("otp:route_name"));
-
-        if (this.creativeName != null)
-            return this.creativeName;
-
-        if (_tags.containsKey("otp:route_ref"))
-            return new NonLocalizedString(_tags.get("otp:route_ref"));
-
-        if (_tags.containsKey("ref"))
-            return new NonLocalizedString(_tags.get("ref"));
-
+    	if(_tags != null) {
+	        if (_tags.containsKey("name"))
+	            return TranslatedString.getI18NString(TemplateLibrary.generateI18N("{name}", this));
+	
+	        if (_tags.containsKey("otp:route_name"))
+	            return new NonLocalizedString(_tags.get("otp:route_name"));
+	
+	        if (this.creativeName != null)
+	            return this.creativeName;
+	
+	        if (_tags.containsKey("otp:route_ref"))
+	            return new NonLocalizedString(_tags.get("otp:route_ref"));
+	
+	        if (_tags.containsKey("ref"))
+	            return new NonLocalizedString(_tags.get("ref"));
+    	}
+    	
         return null;
     }
+    
+    /**
+     * Map tags by prefix
+     * 
+     * @param prefix to check against (must be in lowercase)
+     * @return map of tag name (in lowercase) and value
+     */
 
     public Map<String, String> getTagsByPrefix(String prefix) {
-        Map<String, String> out = new HashMap<String, String>();
+        Map<String, String> out = null;
         for (Map.Entry<String, String> entry : _tags.entrySet()) {
             String k = entry.getKey();
-            if (k.equals(prefix) || k.startsWith(prefix + ":")) {
+            
+            // k equals prefix, or starts with prefix + colon
+            if(k.startsWith(prefix) && (k.length() == prefix.length() || k.charAt(prefix.length()) == ':')) {
+            	if(out == null) {
+            		out = new HashMap<String, String>(_tags.size());            		
+            	}
                 out.put(k, entry.getValue());
             }
         }
 
-        if (out.isEmpty())
-            return null;
         return out;
     }
 
@@ -194,9 +220,10 @@ public class OSMWithTags {
      * @return
      */
     public boolean isUnderConstruction() {
-        String highway = getTag("highway");
-        String cycleway = getTag("cycleway");
-        return "construction".equals(highway) || "construction".equals(cycleway);
+        if(isTag("highway", "construction")) {
+        	return true;
+        }
+        return isTag("cycleway", "construction");
     }
 
     /**
@@ -300,29 +327,35 @@ public class OSMWithTags {
      */
     public boolean isThroughTrafficExplicitlyDisallowed() {
         String access = getTag("access");
-        boolean noThruTraffic = "destination".equals(access) || "private".equals(access)
+        return "destination".equals(access) || "private".equals(access)
                 || "customers".equals(access) || "delivery".equals(access)
                 || "forestry".equals(access) || "agricultural".equals(access);
-        return noThruTraffic;
     }
     
     /**
      * @return True if this node / area is a park and ride.
      */
     public boolean isParkAndRide() {
-        String parkingType = getTag("parking");
         String parkAndRide = getTag("park_ride");
-        return isTag("amenity", "parking")
-                && (parkingType != null && parkingType.contains("park_and_ride"))
-                || (parkAndRide != null && !parkAndRide.equalsIgnoreCase("no"));
+        if(parkAndRide != null && !parkAndRide.equalsIgnoreCase("no")) {
+        	return true;
+        }
+        if(isTag("amenity", "parking")) {
+            String parkingType = getTag("parking");
+            return parkingType != null && parkingType.contains("park_and_ride");
+        }
+        return false;
     }
 
     /**
      * @return True if this node / area is a bike parking.
      */
     public boolean isBikeParking() {
-        return isTag("amenity", "bicycle_parking") && !isTag("access", "private")
-                && !isTag("access", "no");
+        if(isTag("amenity", "bicycle_parking")) {
+        	String tag = getTag("access");
+        	return !("private".equals(tag) || "no".equals(tag));
+        }
+        return false;
     }
 
     public void setCreativeName(I18NString creativeName) {

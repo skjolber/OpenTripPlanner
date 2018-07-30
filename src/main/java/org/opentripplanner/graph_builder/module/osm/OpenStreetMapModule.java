@@ -1205,8 +1205,7 @@ public class OpenStreetMapModule implements GraphBuilderModule {
             if (iv == null) {
                 Coordinate coordinate = getCoordinate(node);
                 String label = getNodeLabel(node);
-                String highway = node.getTag("highway");
-                if ("motorway_junction".equals(highway)) {
+                if (node.isTag("highway", "motorway_junction")) {
                     String ref = node.getTag("ref");
                     if (ref != null) {
                         ExitVertex ev = new ExitVertex(graph, label, coordinate.x, coordinate.y, nid);

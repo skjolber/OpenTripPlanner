@@ -72,7 +72,7 @@ public class OSMFilter {
             return true;
         if (osmEntity.isTag("public_transport", "platform")
                 || osmEntity.isTag("railway", "platform")) {
-            return !("tourism".equals(osmEntity.getTag("usage")));
+            return !osmEntity.isTag("usage", "tourism");
         }
         return false;
     }
@@ -170,7 +170,7 @@ public class OSMFilter {
         }
 
         // Check for foot=discouraged, if applicable
-        if(banDiscouragedWalking && way.hasTag("foot") && way.getTag("foot").equals("discouraged")) {
+        if(banDiscouragedWalking && way.isTag("foot", "discouraged")) {
             permissions = permissions.remove(StreetTraversalPermission.PEDESTRIAN);
         }
 
@@ -182,7 +182,7 @@ public class OSMFilter {
         }
 
         if (way.isBicycleDismountForced() ||
-                (banDiscouragedBiking && way.hasTag("bicycle") && way.getTag("bicycle").equals("discouraged"))) {
+                (banDiscouragedBiking && way.isTag("bicycle", "discouraged"))) {
             permissions = permissions.remove(StreetTraversalPermission.BICYCLE);
             if (forceBikes) {
                 LOG.warn(graph.addBuilderAnnotation(new ConflictingBikeTags(way.getId())));
@@ -260,10 +260,10 @@ public class OSMFilter {
     }
 
     public static int getPlatformClass(OSMWithTags way) {
-        String highway = way.getTag("highway");
-        if ("platform".equals(way.getTag("railway"))) {
+        if (way.isTag("railway", "platform")) {
             return StreetEdge.CLASS_TRAIN_PLATFORM;
         }
+        String highway = way.getTag("highway");
         if ("platform".equals(highway) || "platform".equals(way.getTag("public_transport"))) {
             if (way.isTagTrue("train") || way.isTagTrue("subway") || way.isTagTrue("tram")
                     || way.isTagTrue("monorail")) {

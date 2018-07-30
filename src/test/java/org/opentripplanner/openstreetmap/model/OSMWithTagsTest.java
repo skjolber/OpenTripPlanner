@@ -23,11 +23,9 @@ public class OSMWithTagsTest {
     public void testHasTag() {
         OSMWithTags o = new OSMWithTags();
         assertFalse(o.hasTag("foo"));
-        assertFalse(o.hasTag("FOO"));
         o.addTag("foo", "bar");
         
         assertTrue(o.hasTag("foo"));
-        assertTrue(o.hasTag("FOO"));
     }
 
     @Test
@@ -38,7 +36,6 @@ public class OSMWithTagsTest {
         
         o.addTag("foo", "bar");
         assertEquals("bar", o.getTag("foo"));
-        assertEquals("bar", o.getTag("FOO"));
     }
     
     @Test
@@ -81,13 +78,10 @@ public class OSMWithTagsTest {
         assertFalse(o.isTagFalse("foo"));
         assertFalse(o.isTagFalse("FOO"));
         assertTrue(o.isTagTrue("foo"));
-        assertTrue(o.isTagTrue("FOO"));
         
         o.addTag("foo", "no");
         assertTrue(o.isTagFalse("foo"));
-        assertTrue(o.isTagFalse("FOO"));
         assertFalse(o.isTagTrue("foo"));
-        assertFalse(o.isTagTrue("FOO"));
     }
     
     @Test
