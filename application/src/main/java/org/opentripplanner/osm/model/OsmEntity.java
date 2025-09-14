@@ -1018,4 +1018,27 @@ public class OsmEntity {
   public String toString() {
     return ToStringBuilder.of(this.getClass()).addObj("tags", tags).toString();
   }
+
+  @Nullable
+  public String getTagForNormalizedTagKey(String tag) {
+    if (tags == null) {
+      return null;
+    }
+    return tags.get(tag);
+  }
+
+  /**
+   * Is the tag defined?
+   */
+  public boolean hasTagForNormalizedTagKey(String tag) {
+    if (tags == null) {
+      return false;
+    }
+    return tags.containsKey(tag);
+  }
+
+  /** normalize key used to look up tags later */
+  public static String normalizeTagKey(String tag) {
+    return tag.toLowerCase();
+  }
 }
