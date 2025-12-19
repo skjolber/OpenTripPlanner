@@ -10,7 +10,9 @@ import org.opentripplanner.ConstantsForTests;
 import org.opentripplanner.TestOtpModel;
 import org.opentripplanner.framework.application.OTPFeature;
 import org.opentripplanner.gtfs.graphbuilder.GtfsBundle;
+import org.opentripplanner.gtfs.graphbuilder.GtfsBundleTestFactory;
 import org.opentripplanner.gtfs.graphbuilder.GtfsModule;
+import org.opentripplanner.gtfs.graphbuilder.GtfsModuleTestFactory;
 import org.opentripplanner.model.calendar.ServiceDateInterval;
 import org.opentripplanner.routing.graph.Graph;
 import org.opentripplanner.test.support.ResourceLoader;
@@ -42,10 +44,10 @@ public final class FlexIntegrationTestData {
 
   private static TestOtpModel buildFlexGraph(File file) {
     var deduplicator = new Deduplicator();
-    var graph = new Graph(deduplicator);
+    var graph = new Graph();
     var timetableRepository = new TimetableRepository(new SiteRepository(), deduplicator);
-    GtfsBundle gtfsBundle = GtfsBundle.forTest(file);
-    GtfsModule module = GtfsModule.forTest(
+    GtfsBundle gtfsBundle = GtfsBundleTestFactory.forTest(file);
+    GtfsModule module = GtfsModuleTestFactory.forTest(
       List.of(gtfsBundle),
       timetableRepository,
       graph,

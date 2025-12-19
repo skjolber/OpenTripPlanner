@@ -13,15 +13,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 import org.opentripplanner.TestServerContext;
-import org.opentripplanner.ext.fares.impl.gtfs.DefaultFareService;
+import org.opentripplanner.ext.carpooling.internal.DefaultCarpoolingRepository;
+import org.opentripplanner.ext.fares.service.gtfs.v1.DefaultFareService;
 import org.opentripplanner.framework.application.OtpAppException;
-import org.opentripplanner.graph_builder.module.linking.TestVertexLinker;
 import org.opentripplanner.model.plan.Itinerary;
 import org.opentripplanner.raptor.configure.RaptorConfig;
 import org.opentripplanner.routing.algorithm.raptoradapter.transit.TripSchedule;
 import org.opentripplanner.routing.api.response.RoutingResponse;
 import org.opentripplanner.routing.framework.DebugTimingAggregator;
 import org.opentripplanner.routing.graph.Graph;
+import org.opentripplanner.routing.linking.VertexLinkerTestFactory;
 import org.opentripplanner.service.realtimevehicles.internal.DefaultRealtimeVehicleService;
 import org.opentripplanner.service.vehicleparking.internal.DefaultVehicleParkingRepository;
 import org.opentripplanner.service.vehiclerental.internal.DefaultVehicleRentalService;
@@ -96,11 +97,12 @@ public class SpeedTest {
 
     UpdaterConfigurator.configure(
       graph,
-      TestVertexLinker.of(graph),
+      VertexLinkerTestFactory.of(graph),
       new DefaultRealtimeVehicleService(transitService),
       new DefaultVehicleRentalService(),
       new DefaultVehicleParkingRepository(),
       timetableRepository,
+      new DefaultCarpoolingRepository(),
       new TimetableSnapshotManager(null, TimetableSnapshotParameters.DEFAULT, LocalDate::now),
       config.updatersConfig
     );
@@ -113,11 +115,14 @@ public class SpeedTest {
       RaptorEnvironmentFactory.create(config.transitRoutingParams.searchThreadPoolSize())
     );
 
+    var vertexLinker = VertexLinkerTestFactory.of(graph);
+
     this.serverContext = new DefaultServerRequestContext(
       DebugUiConfig.DEFAULT,
       new DefaultFareService(),
       config.flexConfig,
       graph,
+      TestServerContext.createLinkingContextFactory(graph, vertexLinker, transitService),
       timer.getRegistry(),
       raptorConfig,
       TestServerContext.createRealtimeVehicleService(transitService),
@@ -131,9 +136,12 @@ public class SpeedTest {
       VectorTileConfig.DEFAULT,
       TestServerContext.createVehicleParkingService(),
       TestServerContext.createVehicleRentalService(),
-      TestVertexLinker.of(graph),
+      vertexLinker,
       TestServerContext.createViaTransferResolver(graph, transitService),
       TestServerContext.createWorldEnvelopeService(),
+      null,
+      null,
+      TestServerContext.createStreetDetailsService(),
       null,
       null,
       null,

@@ -20,10 +20,11 @@ import org.opentripplanner.TestOtpModel;
 import org.opentripplanner.TestServerContext;
 import org.opentripplanner.framework.application.OTPFeature;
 import org.opentripplanner.graph_builder.issue.api.DataImportIssueStore;
-import org.opentripplanner.graph_builder.module.DirectTransferGenerator;
 import org.opentripplanner.graph_builder.module.TestStreetLinkerModule;
-import org.opentripplanner.gtfs.graphbuilder.GtfsBundle;
+import org.opentripplanner.graph_builder.module.transfer.DirectTransferGenerator;
+import org.opentripplanner.gtfs.graphbuilder.GtfsBundleTestFactory;
 import org.opentripplanner.gtfs.graphbuilder.GtfsModule;
+import org.opentripplanner.gtfs.graphbuilder.GtfsModuleTestFactory;
 import org.opentripplanner.model.GenericLocation;
 import org.opentripplanner.model.calendar.ServiceDateInterval;
 import org.opentripplanner.model.plan.Itinerary;
@@ -163,8 +164,8 @@ public class FlexIntegrationTest {
 
     // walk, flex
     assertEquals(2, itin.legs().size());
-    assertEquals("2021-12-02T12:52:54-05:00[America/New_York]", itin.startTime().toString());
-    assertEquals(3203, itin.generalizedCost());
+    assertEquals("2021-12-02T12:52:56-05:00[America/New_York]", itin.startTime().toString());
+    assertEquals(3248, itin.generalizedCost());
 
     var walkToFlex = itin.streetLeg(0);
     assertEquals(WALK, walkToFlex.getMode());
@@ -191,8 +192,8 @@ public class FlexIntegrationTest {
     List<File> gtfsFiles
   ) {
     // GTFS
-    var gtfsBundles = gtfsFiles.stream().map(GtfsBundle::forTest).toList();
-    GtfsModule gtfsModule = GtfsModule.forTest(
+    var gtfsBundles = gtfsFiles.stream().map(GtfsBundleTestFactory::forTest).toList();
+    GtfsModule gtfsModule = GtfsModuleTestFactory.forTest(
       gtfsBundles,
       timetableRepository,
       graph,
@@ -256,7 +257,7 @@ public class FlexIntegrationTest {
           modes.withEgressMode(FLEXIBLE);
         }
 
-        journeyBuilder.setModes(modes.build());
+        journeyBuilder.withModes(modes.build());
       })
       .buildRequest();
 

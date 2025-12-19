@@ -2,12 +2,15 @@ package org.opentripplanner.standalone.api;
 
 import graphql.schema.GraphQLSchema;
 import io.micrometer.core.instrument.MeterRegistry;
+import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
 import org.opentripplanner.apis.gtfs.GtfsApiParameters;
 import org.opentripplanner.apis.transmodel.TransmodelAPIParameters;
 import org.opentripplanner.astar.spi.TraverseVisitor;
+import org.opentripplanner.ext.carpooling.CarpoolingService;
 import org.opentripplanner.ext.dataoverlay.routing.DataOverlayContext;
+import org.opentripplanner.ext.empiricaldelay.EmpiricalDelayService;
 import org.opentripplanner.ext.flex.FlexParameters;
 import org.opentripplanner.ext.geocoder.LuceneIndex;
 import org.opentripplanner.ext.ridehailing.RideHailingService;
@@ -25,15 +28,18 @@ import org.opentripplanner.routing.api.request.RouteRequest;
 import org.opentripplanner.routing.fares.FareService;
 import org.opentripplanner.routing.graph.Graph;
 import org.opentripplanner.routing.graphfinder.GraphFinder;
+import org.opentripplanner.routing.linking.LinkingContextFactory;
 import org.opentripplanner.routing.linking.VertexLinker;
 import org.opentripplanner.routing.via.ViaCoordinateTransferFactory;
 import org.opentripplanner.service.realtimevehicles.RealtimeVehicleService;
+import org.opentripplanner.service.streetdetails.StreetDetailsService;
 import org.opentripplanner.service.vehicleparking.VehicleParkingService;
 import org.opentripplanner.service.vehiclerental.VehicleRentalService;
 import org.opentripplanner.service.worldenvelope.WorldEnvelopeService;
 import org.opentripplanner.standalone.config.DebugUiConfig;
 import org.opentripplanner.standalone.config.routerconfig.VectorTileConfig;
 import org.opentripplanner.street.model.edge.Edge;
+import org.opentripplanner.street.model.edge.ExtensionRequestContext;
 import org.opentripplanner.street.search.state.State;
 import org.opentripplanner.street.service.StreetLimitationParametersService;
 import org.opentripplanner.transit.service.TransitService;
@@ -121,9 +127,10 @@ public interface OtpServerRequestContext {
 
   default GraphFinder graphFinder() {
     return GraphFinder.getInstance(
-      graph(),
-      vertexLinker(),
-      transitService()::findRegularStopsByBoundingBox
+      graph().hasStreets,
+      transitService()::getRegularStop,
+      transitService()::findRegularStopsByBoundingBox,
+      linkingContextFactory()
     );
   }
 
@@ -142,17 +149,29 @@ public interface OtpServerRequestContext {
   /* Sandbox modules */
 
   @Nullable
-  default DataOverlayContext dataOverlayContext(RouteRequest request) {
-    return OTPFeature.DataOverlay.isOnElseNull(() ->
-      new DataOverlayContext(
-        graph().dataOverlayParameterBindings,
-        request.preferences().system().dataOverlay()
-      )
-    );
+  CarpoolingService carpoolingService();
+
+  @Nullable
+  default List<ExtensionRequestContext> listExtensionRequestContexts(RouteRequest request) {
+    var list = new ArrayList<ExtensionRequestContext>();
+    if (OTPFeature.DataOverlay.isOn()) {
+      list.add(
+        new DataOverlayContext(
+          graph().dataOverlayParameterBindings,
+          request.preferences().system().dataOverlay()
+        )
+      );
+    }
+    return list;
   }
 
   @Nullable
   ItineraryDecorator emissionItineraryDecorator();
+
+  StreetDetailsService streetDetailsService();
+
+  @Nullable
+  EmpiricalDelayService empiricalDelayService();
 
   @Nullable
   LuceneIndex lucenceIndex();
@@ -172,4 +191,6 @@ public interface OtpServerRequestContext {
   FareService fareService();
 
   VertexLinker vertexLinker();
+
+  LinkingContextFactory linkingContextFactory();
 }

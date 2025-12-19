@@ -5,11 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.opentripplanner.core.model.id.FeedScopedId;
 import org.opentripplanner.model.Frequency;
 import org.opentripplanner.model.StopTime;
 import org.opentripplanner.transit.model._data.TimetableRepositoryForTest;
 import org.opentripplanner.transit.model.framework.Deduplicator;
-import org.opentripplanner.transit.model.framework.FeedScopedId;
 import org.opentripplanner.transit.model.site.RegularStop;
 import org.opentripplanner.transit.model.timetable.FrequencyEntry;
 import org.opentripplanner.transit.model.timetable.ScheduledTripTimes;
@@ -99,12 +99,9 @@ public class FrequencyEntryTest {
   }
 
   private static FrequencyEntry make(int startTime, int endTime, int headwaySecs, boolean exact) {
-    Frequency f = new Frequency();
-    f.setStartTime(startTime);
-    f.setEndTime(endTime);
-    f.setHeadwaySecs(headwaySecs);
-    f.setExactTimes(exact ? 1 : 0);
-
-    return new FrequencyEntry(f, tripTimes);
+    return new FrequencyEntry(
+      new Frequency(tripTimes.getTrip(), startTime, endTime, headwaySecs, exact),
+      tripTimes
+    );
   }
 }

@@ -3,7 +3,6 @@ package org.opentripplanner.standalone.config.routerequest;
 import static org.opentripplanner.standalone.config.framework.json.OtpVersion.V2_0;
 import static org.opentripplanner.standalone.config.framework.json.OtpVersion.V2_1;
 import static org.opentripplanner.standalone.config.framework.json.OtpVersion.V2_2;
-import static org.opentripplanner.standalone.config.framework.json.OtpVersion.V2_3;
 import static org.opentripplanner.standalone.config.framework.json.OtpVersion.V2_4;
 import static org.opentripplanner.standalone.config.framework.json.OtpVersion.V2_5;
 import static org.opentripplanner.standalone.config.framework.json.OtpVersion.V2_7;
@@ -77,7 +76,7 @@ public class RouteRequestConfig {
     );
 
     requestBuilder.withJourney(b ->
-      b.setModes(
+      b.withModes(
         c
           .of("modes")
           .since(V2_0)
@@ -284,14 +283,14 @@ public class RouteRequestConfig {
               .asEnumMap(TransitMode.class, Duration.class)
           )
       )
-      .setIgnoreRealtimeUpdates(
+      .withIgnoreRealtimeUpdates(
         c
           .of("ignoreRealtimeUpdates")
           .since(V2_0)
           .summary("When true, real-time updates are ignored during this search.")
           .asBoolean(dft.ignoreRealtimeUpdates())
       )
-      .setOtherThanPreferredRoutesPenalty(
+      .withOtherThanPreferredRoutesPenalty(
         c
           .of("otherThanPreferredRoutesPenalty")
           .since(V2_0)
@@ -303,14 +302,14 @@ public class RouteRequestConfig {
           )
           .asInt(dft.otherThanPreferredRoutesPenalty())
       )
-      .setReluctanceForMode(
+      .withReluctanceForMode(
         c
           .of("transitReluctanceForMode")
           .since(V2_1)
           .summary("Transit reluctance for a given transport mode")
           .asEnumMap(TransitMode.class, Double.class)
       )
-      .setUnpreferredCost(
+      .withUnpreferredCost(
         c
           .of("unpreferredCost")
           .since(V2_2)
@@ -340,28 +339,6 @@ public class RouteRequestConfig {
     if (relaxTransitGroupPriorityValue != null) {
       builder.withRelaxTransitGroupPriority(CostLinearFunction.of(relaxTransitGroupPriorityValue));
     }
-
-    // TODO REMOVE THIS
-    builder.withRaptor(it ->
-      c
-        .of("relaxTransitSearchGeneralizedCostAtDestination")
-        .since(V2_3)
-        .summary("Whether non-optimal transit paths at the destination should be returned")
-        .description(
-          """
-          Let c be the existing minimum pareto optimal generalized cost to beat. Then a trip
-          with cost c' is accepted if the following is true:
-          `c' < Math.round(c * relaxRaptorCostCriteria)`.
-
-          The parameter is optional. If not set a normal comparison is performed.
-
-          Values equals or less than zero is not allowed. Values greater than 2.0 are not
-          supported, due to performance reasons.
-          """
-        )
-        .asDoubleOptional()
-        .ifPresent(it::withRelaxGeneralizedCostAtDestination)
-    );
   }
 
   private static void mapBikePreferences(NodeAdapter root, BikePreferences.Builder builder) {
@@ -841,7 +818,9 @@ public class RouteRequestConfig {
         c
           .of("stairsReluctance")
           .since(V2_0)
-          .summary("Used instead of walkReluctance for stairs.")
+          .summary(
+            "A multiplier to specify how bad walking on stairs is, on top of the reluctance parameter."
+          )
           .asDouble(dft.stairsReluctance())
       )
       .withStairsTimeFactor(
